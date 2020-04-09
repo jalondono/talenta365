@@ -7,7 +7,7 @@ from .models import Regions, City
 # Register your models here.
 
 class RegionAdmin(admin.ModelAdmin):
-    list_display = ('name', 'cities')
+    list_display = ('name',)
 
 
 class CityAdmin(admin.ModelAdmin):
