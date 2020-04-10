@@ -1,86 +1,91 @@
 (function ($) {
 
     "use strict";
-    let dataCity;
+    let dataCity = [];
     let dataRegion;
     let dictNamesCities = {};
-
-
-
+    let regions_cities = {};
+    const optionSelectorCityCreat =  document.querySelector("#selectCityCreationRegion");
+    const optionSelectorCityEdit =  document.querySelector("#selectCityEditRegion");
+    document.addEventListener("DOMContentLoaded", ready);
     // Load all Cities on the items
     function loadCities() {
-        const optionSelector =  document.querySelector("#selectCityCreationRegion");
         $.ajax({
-            url: 'http://localhost:8000/api/v1/city/',
+            url: 'http://3.135.230.1/api/v1/city/',
             type: 'GET',
         }).done((data) => {
             data.forEach((item) => {
                 dataCity=data;
-                dictNamesCities[item.name] = item.name;
+                dictNamesCities[item.name] = item.id;
 
                 //Visualization
                 $('#selectCityVisualization').append(new Option(item.name, item.name, true, true));
 
                 //Creation
-
                 const option = document.createElement("option");
-                // console.log(item.id);
-                // console.log(item.name);
                 option.id = item.id;
                 option.innerText =  item.name;
-                optionSelector.appendChild(option);
+                optionSelectorCityCreat.appendChild(option);
+                $('.selectpicker').selectpicker('refresh');
 
                 //Edition
+                //Selector de ciudades
                 $('#selectCityEditCity').append(new Option(item.name, item.name, true, true));
+
+                //optionSelectorCityCreat.appendChild(option);
             });
         });
-        console.log(optionSelector);
     }
     // Load all Regions on the items
     function loadRegions() {
 
         $.ajax({
-            url: 'http://localhost:8000/api/v1/region/',
+            url: 'http://3.135.230.1/api/v1/region/',
             type: 'GET',
         }).done((data) => {
             dataRegion = data;
+            let auxDict = {};
+            let auxList= [];
             data.forEach((item) => {
-                $('#selectRegionVisualization').append(new Option(item.name, item.name, true, true));
+                if (item.name in regions_cities)
+                {
+                    regions_cities[item.name].push(item.cities['0']);
+                }
+                else {
+                    regions_cities[item.name] = [item.cities['0']];
+                }
             });
-            console.log('dataregion');
-            console.log(dataRegion);
+            // Visualizations and Edit to select a Region
+            for (const [key, value] of Object.entries(regions_cities)) {
+                $('#selectRegionVisualization').append(new Option(key, key, true, true));
+                $('#selectRegionEditRegion').append(new Option(key, key, true, true));
+                console.log(key, value);
+            }
         });
     }
+
     // Load everything the first time
     function ready() {
         loadCities();
         loadRegions();
     }
     // This method is executed when the DOM is loaded
-    document.addEventListener("DOMContentLoaded", ready);
 
 
-    //Trying to set data to multiple selector
 
-    // dataCity.forEach( (element) => {
-    //     const option = document.createElement("option");
-    //     option.id = element.id;
-    //     option.innerText =  element.name;
-    //     optionSelector.appendChild(option);
-    // });
-
-    let arrayIDs = [];
+    // Selector Manager
+    let arrayIdsCreateCity = [];
     $('#selectCityCreationRegion').on("changed.bs.select", function(e, clickedIndex, isSelected, previousValue){
         var array = [...e.target];
         if(isSelected) {
-            console.log(array[clickedIndex].id);
-            arrayIDs.push(array[clickedIndex].id)
+            // console.log(array[clickedIndex].id);
+            arrayIdsCreateCity.push(array[clickedIndex].id)
         }
         else {
-            console.log(array[clickedIndex].id);
-            arrayIDs.pop(array[clickedIndex].id);
+            // console.log(array[clickedIndex].id);
+            arrayIdsCreateCity.pop(array[clickedIndex].id);
         }
-        console.log(arrayIDs);
+        // console.log(arrayIDs);
     });
 
     $('.input100').each(function(){
@@ -113,7 +118,7 @@
         statusNewCity = $('#statusCreateCity option:selected').val();
         if (nameNewCity.length > 0) {
             $.ajax({
-                url: 'http://localhost:8000/api/v1/city/',
+                url: 'http://3.135.230.1/api/v1/city/',
                 type: 'POST',
                 dataType: 'json',
                 data: {
@@ -121,34 +126,38 @@
                     'status': statusNewCity
                 }
             }).done(() => {
-                $("#makeCity").val("");
+                $("#nameCreateCity").val("");
                 loadCities();
                 alert('The City was created');
             }).fail((error) => {
-                alert(error);
+                alert('Ocurrio un error');
             });
         }
     });
 
 // Create a new Region
     var nameNewRegion;
+    nameNewRegion = $("#nameCreateRegion").val().toLowerCase();
     $('#makeRegion').click( function (){
-        nameNewRegion = $("#nameCreateRegion").val().toLowerCase();
         if (nameNewRegion.length > 0) {
-            $.ajax({
-                url: 'http://localhost:8000/api/v1/region/',
-                type: 'POST',
-                dataType: 'json',
-                data: {
-                    'name': nameNewRegion,
-                },
-            }).done(() => {
-                $("#makeRegion").val("");
-                loadRegions();
-                alert('The Region was created');
-            }).fail((error) => {
-                console.log(error)
+            arrayIdsCreateCity.forEach((item) => {
+                $.ajax({
+                    url: 'http://3.135.230.1/api/v1/region/',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {
+                        'name': nameNewRegion,
+                        'cities': item
+                    },
+                }).done(() => {
+                }).fail((error) => {
+                    console.log(error)
+                });
             });
+            $("#nameCreateRegion").val("");
+            $('.selectpicker').selectpicker('deselectAll');
+            loadRegions();
+            alert('The Region was created');
         }
     });
 
