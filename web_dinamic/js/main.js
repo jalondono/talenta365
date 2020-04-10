@@ -1,11 +1,15 @@
 (function ($) {
+
     "use strict";
-let dataCity;
-let dataRegion;
-let dictNamesCities = {};
+    let dataCity;
+    let dataRegion;
+    let dictNamesCities = {};
+
+
 
     // Load all Cities on the items
     function loadCities() {
+        const optionSelector =  document.querySelector("#selectCityCreationRegion");
         $.ajax({
             url: 'http://localhost:8000/api/v1/city/',
             type: 'GET',
@@ -13,16 +17,24 @@ let dictNamesCities = {};
             data.forEach((item) => {
                 dataCity=data;
                 dictNamesCities[item.name] = item.name;
+
                 //Visualization
                 $('#selectCityVisualization').append(new Option(item.name, item.name, true, true));
+
                 //Creation
-                $('#selectCityCreationRegion').append(new Option(item.name, item.name, true, true));
+
+                const option = document.createElement("option");
+                // console.log(item.id);
+                // console.log(item.name);
+                option.id = item.id;
+                option.innerText =  item.name;
+                optionSelector.appendChild(option);
+
                 //Edition
                 $('#selectCityEditCity').append(new Option(item.name, item.name, true, true));
             });
-            console.log('dictnames');
-            console.log(dictNamesCities);
         });
+        console.log(optionSelector);
     }
     // Load all Regions on the items
     function loadRegions() {
@@ -35,6 +47,8 @@ let dictNamesCities = {};
             data.forEach((item) => {
                 $('#selectRegionVisualization').append(new Option(item.name, item.name, true, true));
             });
+            console.log('dataregion');
+            console.log(dataRegion);
         });
     }
     // Load everything the first time
@@ -46,23 +60,28 @@ let dictNamesCities = {};
     document.addEventListener("DOMContentLoaded", ready);
 
 
-
     //Trying to set data to multiple selector
-    var newOptions = dictNamesCities;
 
-    var select = $('#selectCityCreationRegion');
-    if(select.prop) {
-        var options = select.prop('options');
-    }
-    else {
-        var options = select.attr('options');
-    }
-    $('option', select).remove();
+    // dataCity.forEach( (element) => {
+    //     const option = document.createElement("option");
+    //     option.id = element.id;
+    //     option.innerText =  element.name;
+    //     optionSelector.appendChild(option);
+    // });
 
-    $.each(newOptions, function(val, text) {
-        options[options.length] = new Option(text, val);
+    let arrayIDs = [];
+    $('#selectCityCreationRegion').on("changed.bs.select", function(e, clickedIndex, isSelected, previousValue){
+        var array = [...e.target];
+        if(isSelected) {
+            console.log(array[clickedIndex].id);
+            arrayIDs.push(array[clickedIndex].id)
+        }
+        else {
+            console.log(array[clickedIndex].id);
+            arrayIDs.pop(array[clickedIndex].id);
+        }
+        console.log(arrayIDs);
     });
-    select.val();
 
     $('.input100').each(function(){
         $(this).on('blur', function(){

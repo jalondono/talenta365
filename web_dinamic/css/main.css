@@ -575,6 +575,14 @@ textarea.input100 {
   width: 176%;
 }
 
+div.dropdown-menu.open{
+  max-height: 314px !important;
+  overflow: hidden;
+}
+ul.dropdown-menu.inner{
+  max-height: 260px !important;
+  overflow-y: auto;
+}
 
 
 
