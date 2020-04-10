@@ -1,7 +1,7 @@
 (function ($) {
 
     "use strict";
-    let dataCity = [];
+    let dataCity = {};
     let dataRegion;
     let dictNamesCities = {};
     let regions_cities = {};
@@ -15,11 +15,11 @@
             type: 'GET',
         }).done((data) => {
             data.forEach((item) => {
-                dataCity=data;
+                dataCity[item.id] = item.name;
                 dictNamesCities[item.name] = item.id;
 
                 //Visualization
-                $('#selectCityVisualization').append(new Option(item.name, item.name, true, true));
+                //$('#selectCityVisualization').append(new Option(item.name, item.name, true, true));
 
                 //Creation
                 const option = document.createElement("option");
@@ -34,6 +34,7 @@
 
                 //optionSelectorCityCreat.appendChild(option);
             });
+            //console.log(dataCity);
         });
     }
     // Load all Regions on the items
@@ -59,7 +60,7 @@
             for (const [key, value] of Object.entries(regions_cities)) {
                 $('#selectRegionVisualization').append(new Option(key, key, true, true));
                 $('#selectRegionEditRegion').append(new Option(key, key, true, true));
-                console.log(key, value);
+               // console.log(key, value);
             }
         });
     }
@@ -72,8 +73,7 @@
     // This method is executed when the DOM is loaded
 
 
-
-    // Selector Manager
+    // Selector Manager to select cities on Create Region
     let arrayIdsCreateCity = [];
     $('#selectCityCreationRegion').on("changed.bs.select", function(e, clickedIndex, isSelected, previousValue){
         var array = [...e.target];
@@ -88,6 +88,21 @@
         // console.log(arrayIDs);
     });
 
+    // Show cities joined to a region
+        //selectCityVisualization
+    let selectedValue;
+    $('#selectRegionVisualization').on('change', function() {
+        $("#selectCityVisualization").empty();
+         selectedValue = $('#selectRegionVisualization option:selected').val();
+        // alert( this.value );
+        console.log('here')
+        console.log(regions_cities[selectedValue]);
+        for (let items of regions_cities[selectedValue]){
+            console.log(dataCity[items]);
+            $('#selectCityVisualization').append(new Option(dataCity[items], dataCity[items], true, true));
+        }
+    });
+
     $('.input100').each(function(){
         $(this).on('blur', function(){
             if($(this).val().trim() != "") {
@@ -99,11 +114,15 @@
         })
     });
 
-    // Para detectar el cambio del selector
-    // $('#statusCreateCity').on('change', function() {
-    //     // alert( this.value );
-    //     console.log($('#statusCreateCity option:selected').val())
-    // });
+   //  let textSelected;
+   // // Para detectar el cambio del selector
+   //  $('#selectRegionVisualization').on('change', function() {
+   //      // alert( this.value );
+   //      console.log(dataCity);
+   //      textSelected = $('#selectRegionVisualization option:selected').val();
+   //      console.log(dataRegion);
+   //      console.log(textSelected)
+   //  });
 
     var name = $('.validate-input input[name="name"]');
     var email = $('.validate-input input[name="email"]');
