@@ -1,18 +1,24 @@
 (function ($) {
-
     "use strict";
+
+    const url = 'http://3.135.230.1'; // http://localhost
+
     let dataCity = {};
     let dataRegion;
     let dictNamesCities = {};
+    let dictNamesRegions = {};
     let regions_cities = {};
+    let dataCityActivate = {};
 
     const optionSelectorCityCreat =  document.querySelector("#selectCityCreationRegion");
+    const optionSelectorCityEdit =  document.querySelector("#selectCityEditRegion");
+
 
     document.addEventListener("DOMContentLoaded", ready);
     // Load all Cities on the items
     function loadCities() {
         $.ajax({
-            url: 'http://3.135.230.1/api/v1/city/',
+            url: url + '/api/v1/city/',
             type: 'GET',
         }).done((data) => {
             dataCity = {};
@@ -20,8 +26,10 @@
             //$('.selectpicker').remove();
             // $('.selectpicker').selectpicker('deselectAl
             refreshDom();
-
+            console.log(data);
             data.forEach((item) => {
+                if (item.status === '1')
+                    dataCityActivate[item.id] = item.name;
                 dataCity[item.id] = item.name;
                 dictNamesCities[item.name] = item.id;
 
@@ -36,22 +44,30 @@
                 $('.selectpicker').selectpicker('refresh');
 
                 //Edition
+                // Selector de ciudad por regiones
+                const optionEditCityByRegion = document.createElement("option");
+                optionEditCityByRegion.id = item.id;
+                optionEditCityByRegion.innerText =  item.name;
+                optionSelectorCityEdit.appendChild(optionEditCityByRegion);
+                $('.selectpicker').selectpicker('refresh');
+
                 //Selector de ciudades
                 $('#selectCityEditCity').append(new Option(item.name, item.name, true, true));
 
                 //optionSelectorCityCreat.appendChild(option);
             });
-            //console.log(dataCity);
+            console.log(dataCityActivate);
         });
     }
     // Load all Regions on the items
     function loadRegions() {
 
         $.ajax({
-            url: 'http://3.135.230.1/api/v1/region/',
+            url: url + '/api/v1/region/',
             type: 'GET',
         }).done((data) => {
             regions_cities = {};
+            dictNamesRegions = {};
             dataRegion = data;
             console.log(data);
             $('.selectpicker').selectpicker('deselectAll');
@@ -60,15 +76,22 @@
                 if (item.cities.length > 0) {
                     if (item.name in regions_cities)
                     {
-
                         regions_cities[item.name].push(item.cities['0']);
                     }
                     else {
                         regions_cities[item.name] = [item.cities['0']];
                     }
                 }
+                if (item.name in dictNamesRegions) {
+                    dictNamesRegions[item.name].push(item.id);
+                }
+                else {
+                    dictNamesRegions[item.name] = [item.id];
+                }
+
             });
-            console.log('loadregion')
+            console.log(dictNamesRegions);
+            console.log('loadregion');
             console.log(regions_cities);
             // Visualizations and Edit to select a Region
             for (const [key, value] of Object.entries(regions_cities)) {
@@ -86,6 +109,7 @@
     }
     // This method is executed when the DOM is loaded
 
+    // Method refresh the doom when Crud operations Takes place
     function refreshDom() {
         $("#nameEditCity").val("");
 
@@ -120,42 +144,28 @@
         //selectCityVisualization
     let selectedValue;
     $('#selectRegionVisualization').on('change', function() {
+        console.log(regions_cities);
         $("#selectCityVisualization").empty();
          selectedValue = $('#selectRegionVisualization option:selected').val();
-        // alert( this.value );
-        console.log('here');
-        console.log(dataCity);
         for (let items of regions_cities[selectedValue]){
-            console.log(dataCity[items]);
-            console.log(regions_cities);
+            if (items in dataCityActivate)
             $('#selectCityVisualization').append(new Option(dataCity[items], dataCity[items], true, true));
         }
     });
 
-    $('.input100').each(function(){
-        $(this).on('blur', function(){
-            if($(this).val().trim() != "") {
-                $(this).addClass('has-val');
-            }
-            else {
-                $(this).removeClass('has-val');
-            }
-        })
-    });
-
-   //  let textSelected;
-   // // Para detectar el cambio del selector
-   //  $('#selectRegionVisualization').on('change', function() {
-   //      // alert( this.value );
-   //      console.log(dataCity);
-   //      textSelected = $('#selectRegionVisualization option:selected').val();
-   //      console.log(dataRegion);
-   //      console.log(textSelected)
-   //  });
-
-    var name = $('.validate-input input[name="name"]');
-    var email = $('.validate-input input[name="email"]');
-    var message = $('.validate-input textarea[name="message"]');
+    // show cities joined to a region On edit a Region
+    // let selectedValueEdit;
+    // $('#selectRegionEditRegion').on('change', function() {
+    //     $("#selectCityEditRegion").empty();
+    //     selectedValueEdit = $('#selectRegionEditRegion option:selected').val();
+    //     for (let items of regions_cities[selectedValueEdit]){
+    //         const option = document.createElement("option");
+    //         option.id = dataCity[items];
+    //         option.innerText =  dataCity[items];
+    //         optionSelectorCityEdit.appendChild(option);
+    //         $('.selectpicker').selectpicker('refresh');
+    //     }
+    // });
 
     // Create a new City
     var nameNewCity;
@@ -166,7 +176,7 @@
         statusNewCity = $('#statusCreateCity option:selected').val();
         if (nameNewCity.length > 0) {
             $.ajax({
-                url: 'http://3.135.230.1/api/v1/city/',
+                url: url + '/api/v1/city/',
                 type: 'POST',
                 dataType: 'json',
                 data: {
@@ -181,17 +191,18 @@
                 alert('Ocurrio un error');
             });
         }
+        location.reload();
         refreshDom();
     });
 
     // Create a new Region
     let nameNewRegion;
-    nameNewRegion = $("#nameCreateRegion").val().toLowerCase();
     $('#makeRegion').click( function (){
+        nameNewRegion = $("#nameCreateRegion").val().toLowerCase();
         if (nameNewRegion.length > 0) {
             arrayIdsCreateCity.forEach((item) => {
                 $.ajax({
-                    url: 'http://3.135.230.1/api/v1/region/',
+                    url: url + '/api/v1/region/',
                     type: 'POST',
                     dataType: 'json',
                     data: {
@@ -208,6 +219,8 @@
             refreshDom();
             loadRegions();
             alert('The Region was created');
+            location.reload();
+
         }
     });
 
@@ -222,7 +235,7 @@
 
         if (newNameEditCity.length > 0) {
             $.ajax({
-                url: 'http://3.135.230.1/api/v1/city/' + dictNamesCities[currentNameEdit] + '/',
+                url: url + '/api/v1/city/' + dictNamesCities[currentNameEdit] + '/',
                 type: 'PUT',
                 dataType: 'json',
                 data: {
@@ -247,7 +260,7 @@
         console.log(currentNameDelete);
         if (currentNameDelete.length > 0) {
             $.ajax({
-                url: 'http://3.135.230.1/api/v1/city/' + dictNamesCities[currentNameDelete] + '/',
+                url: url + '/api/v1/city/' + dictNamesCities[currentNameDelete] + '/',
                 type: 'DELETE',
                 dataType: 'json',
             }).done(() => {
@@ -260,6 +273,53 @@
             alert('The city was Deleted');
         }
     });
+
+    // delete region
+
+    $('#deleteRegion').click( function () {
+        currentNameDelete = $('#selectRegionEditRegion option:selected').val();
+        console.log(currentNameDelete);
+        if (currentNameDelete.length > 0){
+            for (let item of dictNamesRegions[currentNameDelete]) {
+                $.ajax({
+                    url: url + '/api/v1/region/' + item + '/',
+                    type: 'DELETE',
+                    dataType: 'json',
+                }).done(() => {
+                }).fail((error) => {
+                    console.log(error)
+                });
+            }
+                refreshDom();
+                loadRegions();
+                location.reload();
+                alert('The city was Deleted');
+        }
+    });
+
+
+
+
+
+    //=======================================================================================
+
+    var name = $('.validate-input input[name="name"]');
+    var email = $('.validate-input input[name="email"]');
+    var message = $('.validate-input textarea[name="message"]');
+
+    $('.input100').each(function(){
+        $(this).on('blur', function(){
+            if($(this).val().trim() != "") {
+                $(this).addClass('has-val');
+            }
+            else {
+                $(this).removeClass('has-val');
+            }
+        })
+    });
+
+
+
 
     $('.validate-form').on('submit',function(){
         var check = true;
