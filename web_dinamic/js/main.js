@@ -26,7 +26,6 @@
             //$('.selectpicker').remove();
             // $('.selectpicker').selectpicker('deselectAl
             refreshDom();
-            console.log(data);
             data.forEach((item) => {
                 if (item.status === '1')
                     dataCityActivate[item.id] = item.name;
@@ -56,7 +55,6 @@
 
                 //optionSelectorCityCreat.appendChild(option);
             });
-            console.log(dataCityActivate);
         });
     }
     // Load all Regions on the items
@@ -69,7 +67,6 @@
             regions_cities = {};
             dictNamesRegions = {};
             dataRegion = data;
-            console.log(data);
             $('.selectpicker').selectpicker('deselectAll');
             $('.selectpicker').selectpicker('refresh');
             data.forEach((item) => {
@@ -90,9 +87,6 @@
                 }
 
             });
-            console.log(dictNamesRegions);
-            console.log('loadregion');
-            console.log(regions_cities);
             // Visualizations and Edit to select a Region
             for (const [key, value] of Object.entries(regions_cities)) {
                 $('#selectRegionVisualization').append(new Option(key, key, true, true));
@@ -140,6 +134,20 @@
         // console.log(arrayIDs);
     });
 
+    let arrayIdsEditRegionCity = [];
+    $('#selectCityEditRegion').on("changed.bs.select", function(e, clickedIndex, isSelected, previousValue){
+        var arrayEdit = [...e.target];
+        if(isSelected) {
+            // console.log(array[clickedIndex].id);
+            arrayIdsEditRegionCity.push(arrayEdit[clickedIndex].id)
+        }
+        else {
+            // console.log(array[clickedIndex].id);
+            arrayIdsEditRegionCity.pop(arrayEdit[clickedIndex].id);
+        }
+        // console.log(arrayIDs);
+    });
+
     // Show cities joined to a region
         //selectCityVisualization
     let selectedValue;
@@ -153,19 +161,18 @@
         }
     });
 
-    // show cities joined to a region On edit a Region
-    // let selectedValueEdit;
-    // $('#selectRegionEditRegion').on('change', function() {
-    //     $("#selectCityEditRegion").empty();
-    //     selectedValueEdit = $('#selectRegionEditRegion option:selected').val();
-    //     for (let items of regions_cities[selectedValueEdit]){
-    //         const option = document.createElement("option");
-    //         option.id = dataCity[items];
-    //         option.innerText =  dataCity[items];
-    //         optionSelectorCityEdit.appendChild(option);
-    //         $('.selectpicker').selectpicker('refresh');
-    //     }
-    // });
+    //show cities joined to a region On edit a Region
+    let selectedValueEdit;
+    let currentCitiesOfRegion = {};
+    $('#selectRegionEditRegion').on('change', function() {
+        currentCitiesOfRegion = {};
+        $("#selectCityEditRegion").empty();
+        selectedValueEdit = $('#selectRegionEditRegion option:selected').val();
+        for (let items of regions_cities[selectedValueEdit]){
+            currentCitiesOfRegion[items] = dataCity[items];
+        }
+        console.log(currentCitiesOfRegion);
+    });
 
     // Create a new City
     var nameNewCity;
@@ -191,8 +198,9 @@
                 alert('Ocurrio un error');
             });
         }
-        location.reload();
+
         refreshDom();
+        //location.reload();
     });
 
     // Create a new Region
@@ -250,6 +258,33 @@
             refreshDom();
             loadCities();
             alert('The city was updated');
+            //location.reload();
+        }
+    });
+
+    // Save edit Region
+    let nameRegionEdit;
+    $('#saveEditRegion').click(function () {
+        nameRegionEdit = $("#selectRegionEditRegion").val().toLowerCase();
+        if (nameRegionEdit.length > 0){
+            arrayIdsEditRegionCity.forEach((cityId) => {
+                if (!(cityId in currentCitiesOfRegion)){
+                    $.ajax({
+                        url: url + '/api/v1/region/',
+                        type: 'POST',
+                        dataType: 'json',
+                        data: {
+                            'name': nameRegionEdit,
+                            'cities': cityId
+                        },
+                    }).done(() => {
+                    }).fail((error) => {
+                        console.log(error)
+                    });
+                }
+            });
+            alert('Thew Region was Update');
+            location.reload();
         }
     });
 
