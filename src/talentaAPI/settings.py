@@ -25,7 +25,10 @@ SECRET_KEY = 'nkv+)d*qx&ri5v%02$4@%2d+crj$%=eunzy+)k%$m7#h+hb(5a'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['3.135.230.1',
+                 'localhost']
+CORS_ORIGIN_ALLOW_ALL = True
+APPEND_SLASH = False
 
 
 # Application definition
@@ -39,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'regions_cities',
     'rest_framework',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
@@ -49,6 +53,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'talentaAPI.urls'

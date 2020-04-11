@@ -8,7 +8,7 @@ status = [
 
 
 class City(models.Model):
-    name = models.CharField(max_length=40, blank=False)
+    name = models.CharField(max_length=40, blank=False, unique=True)
     status = models.CharField(max_length=45, choices=status, default='ACTIVE')
 
     def __str__(self):
