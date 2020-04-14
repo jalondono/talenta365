@@ -1,5 +1,6 @@
 # Talenta API
 <img align="center" src="https://imgur.com/q5gaIUx" height="50%" width="100%"/>
+<blockquote class="imgur-embed-pub" lang="en" data-id="q5gaIUx"><a href="//imgur.com/q5gaIUx">View post on imgur.com</a></blockquote><script async src="//s.imgur.com/min/embed.js" charset="utf-8"></script>
 
 
 ### Para desplegar el API debe ser ejecutando el siguiente codigo, dentro de la carpeta /src :
