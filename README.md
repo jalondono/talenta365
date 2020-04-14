@@ -1,5 +1,5 @@
 # Talenta API
-<img align="center" src="https://imgur.com/X6dtwYZ" width="100%"/>
+<img align="center" src="https://imgur.com/X6dtwYZ" width="60%"/>
 
 
 ### Para desplegar el API debe ser ejecutando el siguiente codigo, dentro de la carpeta /src :
